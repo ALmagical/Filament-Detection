@@ -2,10 +2,23 @@
 
 We proposed a new solar filaments detection and classification method based on CondInst. The results show that the method performs well in detecting and classifying isolated and non-isolated filaments,especially in solving the fragments problem.
 
+There are two floders, **CondInst-SFDS** and **detectron2**, in this repository.
+
+
+## CondInst-SFDS
+
+CondInst-SFDS (CondInst-Solar Filaments Detection and Segmentation) is used for solar filaments detection and segmentation, which is based on [CondInst](https://github.com/aim-uofa/AdelaiDet).
+
+The code of CondInst-SFDS can be found in this floder.
+
+See the [README](CondInst-SFDS\README.md) in this floder for more detials.
+
 ## detectron2
 
 Some codes in detectron2 has been changed by us.
 
 The modifications include adding the categories of solar filaments, supporting Adam optimazer and so on.
 
-**The Code will be released soon.**
+You can access the original [Detectron](https://github.com/facebookresearch/detectron2) by this link.
+
+
