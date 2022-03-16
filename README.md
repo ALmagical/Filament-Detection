@@ -22,3 +22,20 @@ The modifications include adding the categories of solar filaments, supporting A
 You can access the original [Detectron](https://github.com/facebookresearch/detectron2) by this link.
 
 
+## Installation
+
+Before you use CondInst-SFDS, make sure the **detectron2** has installed.
+
+Build CondInst_SFDS with:
+
+```
+git clone https://github.com/ALmagical/Filament-Detection.git
+
+python -m pip install -e detectron2
+
+cd Filament-Detection
+
+python setup.py build develop
+```
+
+More detail of detectron2 you can see [Readme of detectron2](detectron2\README.md).

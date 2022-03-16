@@ -1,0 +1,77 @@
+_BASE_: "Base-CondInst.yaml"
+VERSION: 2
+MODEL:
+  BASIS_MODULE:
+    NUM_CLASSES: 3
+    NORM: GN
+  WEIGHTS:
+  RESNETS:
+    #STRIDE_IN_1X1: False
+    #NUM_GROUPS: 32
+    #WIDTH_PER_GROUP: 8
+    DEPTH: 50
+    #DEFORM_ON_PER_STAGE: [False, False, False, False] # on Res4, Res5
+    #DEFORM_MODULATED: True # DCNv2
+  FCOS:
+    USE_DEFORMABLE: False
+    CENTER_SAMPLE: True
+    THRESH_WITH_CTR: False
+    NUM_CLASSES: 3
+    NMS_TH: 0.6
+    POS_RADIUS: 2.0
+    TOP_LEVELS: 2
+    SIZES_OF_INTEREST: [64, 128, 256, 512]
+    IN_FEATURES: ['p3', 'p4', 'p5', 'p6', 'p7']
+  ROI_HEADS:
+    NUM_CLASSES: 3
+  CONDINST:
+    MASK_OUT_STRIDE: 4
+    MASK_BRANCH:
+      SEMANTIC_LOSS_ON: True
+      NORM: GN
+    MASK_HEAD:
+      SPECIAL_CLASSES_LOSS: False
+      SPECIAL_CLASSES: [1,]
+      ALPHA: 0.35
+      BETA: 0.65
+      SPECIAL_CLASSES_THRESH: True
+      NMS_THRESH_NORM: 0.1
+      NMS_THRESH_SPC: 0.6
+      NMS_THRESH_ALL: 0.9
+  PIXEL_MEAN:
+  - 100.84
+  - 100.84
+  - 100.84
+  PIXEL_STD:
+  - 70.39
+  - 70.39
+  - 70.39
+DATASETS:
+  TRAIN: ("coco_filament_train",)
+  TEST: ("coco_filament_val",)
+SOLVER:
+  AMP:
+    ENABLED: False
+  IMS_PER_BATCH: 2
+  BASE_LR: 0.004
+  OPTIMIZER: SGD
+  # MAX_ITER = epoch * image_train_total_nums / IMS_PER_BATCH
+  # 127500/255=500
+  LR_SCHEDULER_NAME: WarmupMultiStepLR
+  MAX_ITER: 173360
+  STEPS: (104016, 138688)
+  CHECKPOINT_PERIOD: 8668
+  DEBUG: False
+INPUT:
+  MIN_SIZE_TRAIN: (1024,)
+  MAX_SIZE_TRAIN: 1024
+  CROP:
+    ENABLED: True
+    SIZE: [800, 800]
+    TYPE: absolute_range
+  MIN_SIZE_TEST: 800  
+  MAX_SIZE_TEST: 800
+TEST:
+  EVAL_PERIOD: 8668
+
+OUTPUT_DIR: "Result/CondInst/output/resnet50"

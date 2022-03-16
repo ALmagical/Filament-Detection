@@ -1,0 +1,98 @@
+_BASE_: "Base-CondInst.yaml"
+VERSION: 2
+MODEL:
+  BASIS_MODULE:
+    NUM_CLASSES: 2
+    NORM: GN
+  WEIGHTS:
+  BACKBONE:
+    NAME: "build_fcos_resnet_fpn_backbone"
+    FREEZE_AT: -1
+  RESNETD: True
+  RESNETS:
+    DEPTH: 50
+    NORM: 'GN'
+    OUT_FEATURES: ["res3", "res4", "res5"]
+    STEM_OUT_CHANNELS: 64
+    RES2_OUT_CHANNELS: 64
+    WIDTH_PER_GROUP: 64
+    NUM_GROUPS: 1
+  FPN:
+    IN_FEATURES: ["res3", "res4", "res5"]
+    ATTENTION: None
+    OUT_CHANNELS: 256
+  FCOS:
+    USE_DEFORMABLE: False
+    USE_ATTENTION: False
+    ATTENTION_MODEL: 'SPSA'
+    CENTER_SAMPLE: True
+    THRESH_WITH_CTR: True
+    PRE_NMS_TOPK_TEST: 200
+    PRE_NMS_TOPK_TRAIN: 200
+    NUM_CLASSES: 2
+    NMS_TH: 0.93
+    POS_RADIUS: 2.0
+    TOP_LEVELS: 1 #2
+    SIZES_OF_INTEREST: [64, 128, 256, 512]
+    IN_FEATURES: ['p3', 'p4', 'p5', 'p6'] #['p3', 'p4', 'p5', 'p6', 'p7']
+  ROI_HEADS:
+    NUM_CLASSES: 2
+  CONDINST:
+    MASK_OUT_STRIDE: 4
+    TOP_WITH_COORDS: False
+    BOX_WITH_COORDS: False
+    CLS_WITH_COORDS: False
+    MASK_BRANCH:
+      ASPP: False
+      FUSE_TYPE: 'sum'
+      USE_ATTENTION: false
+      ATTENTION_MODEL: 'SPSA'
+      CHANNELS: 64
+      NORM: GN
+      OUT_CHANNELS: 8
+      IN_FEATURES: ['p3', 'p4', 'p5']
+    MASK_HEAD:
+      SPECIAL_CLASSES_LOSS: False
+      SPECIAL_CLASSES: [1,]
+      MAX_PRE_IMG: 50
+      NMS_KERNEL: gaussian
+      NMS_PRE: 100
+      ALPHA: 0.35
+      BETA: 0.65
+      USE_MASK_NMS: True
+      MASK_THR: 0.5
+      UPDATE_THR: 0.4
+      CHANNELS: 8
+      FUSE_MASK: True
+DATASETS:
+  TRAIN: ("coco_filament_train",)
+  TEST: ("coco_filament_val",)
+SOLVER:
+  AMP:
+    ENABLED: False
+  IMS_PER_BATCH: 2
+  BASE_LR: 0.002
+  OPTIMIZER: SGD
+  #GAMMA: 0.2  #deacay rate
+  # MAX_ITER = epoch * image_train_total_nums / IMS_PER_BATCH
+  # 127500/255=500
+  LR_SCHEDULER_NAME: WarmupMultiStepLR
+  MAX_ITER: 90000
+  STEPS: (30000, 70000) #(52008, 69334)
+  CHECKPOINT_PERIOD: 4500
+  DEBUG: False
+INPUT:
+  #MIN_SIZE_TRAIN: (512, 640, 768, 896, 1024,)
+  #MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TRAIN: (512, 768, 1024)
+  MAX_SIZE_TRAIN: 1024
+  # CROP:
+  #  ENABLED: True
+  #  SIZE: [800, 800]
+  #  TYPE: absolute_range
+  MIN_SIZE_TEST: 1024  
+  MAX_SIZE_TEST: 1024
+TEST:
+  EVAL_PERIOD: 4500
+
+OUTPUT_DIR: "Result/CondInst/output/resnetd50"
