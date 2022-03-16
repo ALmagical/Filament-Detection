@@ -21,22 +21,16 @@ from detectron2.data.datasets import register_coco_instances
 # see https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF
 # for detial
 # @gxl
-'''
-{"color": [216, 27, 96], "isthing": 1, "id": 0,"name": "Filament"},
-{"color": [124, 179, 66], "isthing": 1, "id": 1,"name": "Filaments"},
-{"color": [3, 155, 229], "isthing": 1, "id": 2,"name": "Filament_alone"},
-'''
 register_coco_instances(
-    "coco_filament_train", {"thing_classes": ["Filaments", "Filament_alone"],
-    "thing_colors":[[252, 220, 65], [0, 154, 73]]},  
-    "/home/gxl/Data/20210419/annotations/train.json", 
-    "/home/gxl/Data/20210419/train")
+    "coco_filament_train", {"thing_classes": ["Non-isolated filament", "Isolate filament"],
+    "thing_colors":[[252, 220, 65], [0, 154, 73]]}, 
+    "datasets/annotations/train.json", 
+    "datasets/annotations/train")
 register_coco_instances(
-    "coco_filament_val", {"thing_classes": ["Filaments", "Filament_alone"],
-    "thing_colors":[[252, 220, 65], [0, 154, 73]]},    
-    "/home/gxl/Data/HEK/2014/bitmask/annotations/val.json", 
-    "/home/gxl/Data/HEK/2014/bitmask/val")
-#thing_colors":[[248, 230, 0], [0, 163, 224]]}
+    "coco_filament_train", {"thing_classes": ["Non-isolated filament", "Isolate filament"],
+    "thing_colors":[[252, 220, 65], [0, 154, 73]]}, 
+    "datasets/annotations/val.json", 
+    "datasets/annotations/val")
 # constants
 WINDOW_NAME = "COCO detections"
 

@@ -19,15 +19,15 @@ from detectron2.data.datasets import register_coco_instances
 # for detial
 # @gxl
 register_coco_instances(
-    "coco_filament_train", {"thing_classes": ["Filaments", "Filament_alone"],
+    "coco_filament_train", {"thing_classes": ["Non-isolated filament", "Isolate filament"],
     "thing_colors":[[252, 220, 65], [0, 154, 73]]}, 
-    "/home/gxl/Data/20211002/bitmask/annotations/train.json", 
-    "/home/gxl/Data/20211002/bitmask/train")
+    "datasets/annotations/train.json", 
+    "datasets/annotations/train")
 register_coco_instances(
-    "coco_filament_val", {"thing_classes": ["Filaments", "Filament_alone"],
-    "thing_colors":[[252, 220, 65], [0, 154, 73]]},
-    "/home/gxl/Data/20211002/bitmask/annotations/val.json", 
-    "/home/gxl/Data/20211002/bitmask/val")
+    "coco_filament_train", {"thing_classes": ["Non-isolated filament", "Isolate filament"],
+    "thing_colors":[[252, 220, 65], [0, 154, 73]]}, 
+    "datasets/annotations/val.json", 
+    "datasets/annotations/val")
 
 def create_instances(predictions, image_size):
     ret = Instances(image_size)

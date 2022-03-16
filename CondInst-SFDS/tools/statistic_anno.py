@@ -24,23 +24,19 @@ from detectron2.data.datasets import register_coco_instances
 # see https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF
 # for detial
 # @gxl
-'''
-{"color": [216, 27, 96], "isthing": 1, "id": 0,"name": "Filament"},
-{"color": [124, 179, 66], "isthing": 1, "id": 1,"name": "Filaments"},
-{"color": [3, 155, 229], "isthing": 1, "id": 2,"name": "Filament_alone"},
-'''
+
 register_coco_instances(
     "coco_filament_train", {}, 
-    "/home/gxl/Data/20211002/bitmask_temp/annotations/train.json", 
-    "/home/gxl/Data/20211002/bitmask_temp/train")
+    "datasets/annotations/train.json", 
+    "datasets/annotations/train")
 register_coco_instances(
     "coco_filament_val", {},
-    "/home/gxl/Data/20211002/new-val/new-val.json", 
-    "/home/gxl/Data/20211002/new-val/val")
+    "datasets/annotations/val.json", 
+    "datasets/annotations/val")
 
 
 if __name__ == "__main__":
-    config_file = '/home/gxl/code/AdelaiDet/configs/CondInst/MS_R_50_1x_gxl_test.yaml'
+    config_file = 'configs\CondInst\RESD_50_1x_baseline_cls_2.yaml'
     # Set config file
     cfg = get_cfg()
     if config_file:

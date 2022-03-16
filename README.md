@@ -7,7 +7,7 @@ There are two floders, **CondInst-SFDS** and **detectron2**, in this repository.
 
 ## CondInst-SFDS
 
-CondInst-SFDS (CondInst-Solar Filaments Detection and Segmentation) is used for solar filaments detection and segmentation, which is based on [CondInst](https://github.com/aim-uofa/AdelaiDet).
+CondInst-SFDS (CondInst-Solar Filaments Detection and Segmentation) is used for solar filaments detection and segmentation, which is based on [CondInst](https://github.com/aim-uofa/AdelaiDet/blob/master/configs/CondInst/README.md).
 
 The code of CondInst-SFDS can be found in this floder.
 

@@ -47,37 +47,20 @@ from adet.config import get_cfg
 from adet.checkpoint import AdetCheckpointer
 from adet.evaluation import TextEvaluator
 from detectron2.data.datasets import register_coco_instances
+
 # see https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5#scrollTo=PIbAM2pv-urF
 # for detial
+
 # @gxl
 register_coco_instances(
     "coco_filament_train", {}, 
-    "/home/gxl/Data/20211002/bitmask/annotations/train.json", 
-    "/home/gxl/Data/20211002/bitmask/train")
+    "datasets/annotations/train.json", 
+    "datasets/annotations/train")
 register_coco_instances(
     "coco_filament_val", {},
-    "/home/gxl/Data/20211002/new-val/bitmask/annotations/val.json", 
-    "/home/gxl/Data/20211002/new-val/bitmask/val")
-'''
-    "/home/gxl/Data/20211002/bitmask/annotations/val.json", 
-    "/home/gxl/Data/20211002/bitmask/val"
-    "/home/gxl/Data/test2/bitmask/annotations/val.json", 
-    "/home/gxl/Data/test2/bitmask/val/")
-    "/home/gxl/Data/20210704-use/annotations/val.json", 
-    "/home/gxl/Data/20210704-use/val"
-    "/home/gxl/Data/test3/anno/annotations/val.json", 
-    "/home/gxl/Data/test3/anno/val/"
-    "/home/gxl/Data/20210826/annotations/train.json", 
-    "/home/gxl/Data/20210826/train"
-    "/home/gxl/Data/HEK/2014/bitmask/annotations/val.json", 
-    "/home/gxl/Data/HEK/2014/bitmask/val"
-    "/home/gxl/Data/Newstation/Instance/Smart/bitmask/annotations/val.json", 
-    "/home/gxl/Data/Newstation/Instance/Smart/bitmask/val"
-    "/home/gxl/Data/Newstation/Instance/Huairou/bitmask/annotations/val.json", 
-    "/home/gxl/Data/Newstation/Instance/Huairou/bitmask/val"
-    "/home/gxl/Data/20211002/new-val/bitmask/annotations/val.json", 
-    "/home/gxl/Data/20211002/new-val/bitmask/val"
-'''
+    "datasets/annotations/val.json", 
+    "datasets/annotations/val")
+
 
 
 class Trainer(DefaultTrainer):

@@ -3,10 +3,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # @gxl based on Detectron2 tools/visualize_data.py
 # To Verify the correctness of the augmentation, you should use the script in tools/visualize_data.py
+# This code is used to transforming the 'Fragment' to 'Non-isolated Filament'.
+# At same time, the samples will be rotated to generate more samples.
+#
 # Using the dataloader in Detectron2 to load data with annotations
 # Using the augmentation functions in Detectron2 to augment data offline
-# Also has some interesting tools
-from gxl.test.thresh_seg import thresh_segmentation
+# 
+from tools.test.thresh_seg import thresh_segmentation
 import numpy
 import copy
 import os, sys
@@ -48,13 +51,15 @@ from gxl.test.thresh_seg import thresh_segmentation, shape_to_mask
 
 from detectron2.data.datasets import register_coco_instances
 register_coco_instances(
-    "coco_filament_train", {}, 
-    "/home/gxl/Data/20211002/annotations/train.json", 
-    "/home/gxl/Data/20211002/train")
+    "coco_filament_train", {"thing_classes": ["Non-isolated filament", "Isolate filament"],
+    "thing_colors":[[252, 220, 65], [0, 154, 73]]}, 
+    "datasets/annotations/train.json", 
+    "datasets/annotations/train")
 register_coco_instances(
-    "coco_filament_val", {},
-    "/home/gxl/Data/Newstation/Instance/Smart/val.json", 
-    "/home/gxl/Data/Newstation/Instance/Smart/val")
+    "coco_filament_train", {"thing_classes": ["Non-isolated filament", "Isolate filament"],
+    "thing_colors":[[252, 220, 65], [0, 154, 73]]}, 
+    "datasets/annotations/val.json", 
+    "datasets/annotations/val")
 # JSON encoder
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -81,12 +86,7 @@ def get_centroid(points):
     Gy = int(Gy / area)
     # Setting 3th row with 1. This format is the annotations of keypoints in COCO.
     return [Gx, Gy, 1]
-def saveascsv(file_name, datas):
-    file = codecs.open(file_name, 'w', 'utf-8')
-    writer = csv.writer(file, delimiter=' ', quotechar=' ', quoting=csv.QUOTE_MINIMAL)
-    for data in datas:
-        writer.writerow(datas[data])
-    print('Data has been saved to {}'.format(file_name))
+
 
 def get_inter_mask(k, segms, class_ids, main_segm, visit_mat, img , classes):
     sub_segm = segms[k]
@@ -110,179 +110,16 @@ def get_inter_mask(k, segms, class_ids, main_segm, visit_mat, img , classes):
             mask = new_mask
     return mask
 
-def data_augment(data_input, rotate_angle, thread_num):
-
-    # Read image and bounding box
-    image_input = cv2.imread(data_input["file_name"])
-    # Geting bounding boxes
-    boxes = numpy.asarray(
-        [
-            BoxMode.convert(
-                instance["bbox"], instance["bbox_mode"], BoxMode.XYXY_ABS
-            )
-            for instance in data_ori["annotations"]
-        ]
-    )
-    for angle in range(0, 360, rotate_angle):
-
-        if image_input.mean() < 60 and angle != 0:
-            continue
-        # Get image's shape 
-        image_shape=image_input.shape[:2]
-
-        aug = T.AugmentationList([T.RotationTransform(image_shape[0],image_shape[1],angle=angle, expand=False),])
-        img_aug = T.AugInput(image_input, boxes=boxes,sem_seg=None)
-        transforms = aug(img_aug)
-        img = img_aug.image
-
-        # compute mean and std
-        mean = img.mean()
-        std = img.std()
-        means.append(mean)
-        stds.append(std)
-
-        # Write image info to dict
-        data["images"].append(
-            dict(
-                license=0,
-                url=None,
-                #file_name=osp.relpath(out_img_file, osp.dirname(out_ann_file)),
-                file_name=str(image_id) + ".jpg",
-                height=img.shape[0],
-                width=img.shape[1],
-                date_captured=None,
-                id=i,
-            )
-        )
-        # Deep copy, this will not change the origin annotations
-        data_anno = copy.deepcopy(data_ori)
-        if "annotations" in data_anno:
-            # USER: Implement additional transformations if you have other types of data
-            annos = [
-                transform_instance_annotations(
-                    obj,
-                    transforms,
-                    image_shape,
-                    keypoint_hflip_indices=None,
-                )
-                for obj in data_anno["annotations"]
-                if obj.get("iscrowd", 0) == 0
-            ]
-            instances = annotations_to_instances(
-                annos, image_shape, mask_format="polygon"
-            )
-            # Recompute bounding boxes
-            instances.gt_boxes = instances.gt_masks.get_bounding_boxes()
-            data_anno["instances"] = utils.filter_empty_instances(instances)
-
-            target_fields = data_anno["instances"].get_fields()
-            bboxes = target_fields.get("gt_boxes", None)
-            # Change bbox mode from XYXY_ABS to XYWH_ABS
-            # Coco save boxes annotations as XYWH_ABS
-            bboxes = BoxMode.convert(
-                        bboxes.tensor.numpy(), BoxMode.XYXY_ABS, BoxMode.XYWH_ABS
-                    )
-            segms = target_fields.get("gt_masks", None)
-            class_ids = target_fields.get("gt_classes", None)
-            assert len(bboxes) == len(segms)
-            visit_mat = numpy.zeros(len(bboxes), dtype=bool)
-            for j, [bbox, segm, class_id] in enumerate(zip(bboxes, segms, class_ids)):
-                class_id = int(class_id)
-                class_name = classes[class_id]
-                if visit_mat[j] == True:
-                    continue
-                if class_name == 'Filament_alone':
-                    # Recompute mask by using local thresh
-                    new_mask, class_name, area = thresh_segmentation(img, sub_segm, class_name, erosion=False, k_shape=cv2.MORPH_ELLIPSE, k_size=(3,3))
-                    visit_mat[j] = True
-                    if area == 0:
-                        continue
-                    areas.append(area)
-                    class_id = class_name_to_id[class_name]
-                    
-                elif class_name == 'Filaments':
-                    mask_all = []
-                    main_segm = shape_to_mask(img.shape[:2], numpy.asarray(segm).reshape(-1, 2))
-                    main_segm = numpy.asfortranarray(main_segm)
-                    main_segm = pycocotools.mask.encode(main_segm)
-                    # Version parallelize
-                    if thread_num > 1:
-                        iter_range = [x for x in range(len(segms))]
-                        thread_pool = ThreadPool(thread_num)
-                        mask_all = thread_pool.map(partial(get_inter_mask, segms=segms, class_ids=class_ids, main_segm=main_segm, visit_mat=visit_mat, img=img, classes=classes), iter_range)
-                        thread_pool.close()
-                        thread_pool.join()
-                        mask_all = [mask for mask in mask_all if mask != None]
-                    else:
-                    # Single process
-                        for k, [sub_segm, class_id] in enumerate(zip(segms, class_ids)):
-                            if visit_mat[k] == False:
-                                class_id = int(class_id)
-                                class_name = classes[class_id]
-                                if class_name != 'Filament':
-                                    continue
-                                
-                                #sub_segm = numpy.asfortranarray(numpy.uint8(sub_segm))
-                                #sub_segm = pycocotools.mask.encode(sub_segm)
-                                
-                                sub_segm = shape_to_mask(img.shape[:2], numpy.asarray(sub_segm).reshape(-1, 2))
-                                sub_segm = numpy.asfortranarray(sub_segm)
-                                sub_segm = pycocotools.mask.encode(sub_segm)
-                                iou = pycocotools.mask.iou([sub_segm], [main_segm], [0])
-                                if iou > 0:
-                                    # Recompute mask by using local thresh
-                                    new_mask, class_name, area = thresh_segmentation(img, sub_segm, class_name, erosion=False, k_shape=cv2.MORPH_ELLIPSE, k_size=(3,3))
-                                    visit_mat[k] = True
-                                    if area == 0:
-                                        continue
-                                    mask_all.append(new_mask)
-                                
-                    # Mearge masks
-                    visit_mat[j] = True
-                    if len(mask_all) > 0:
-                        new_mask = numpy.zeros_like(pycocotools.mask.decode(mask_all[0]))
-                        for mask_s in mask_all:
-                            new_mask = new_mask | pycocotools.mask.decode(mask_s)
-                        new_mask = pycocotools.mask.encode(new_mask)
-                        area = float(pycocotools.mask.area(new_mask))
-                        areas.append(area)
-                        if len(mask_all) == 1:
-                            class_name = 'Filament_alone'
-                        else:
-                            class_name = 'Filaments'
-                        class_id = class_name_to_id[class_name]
-                    else:
-                        continue
-                else:
-                    continue
-                # Get bounding boxes
-                bbox = pycocotools.mask.toBbox(new_mask).tolist()
-                # Write annotations to dict
-                data["annotations"].append(
-                    dict(
-                        id=len(data["annotations"]),
-                        image_id=i,
-                        category_id=class_id,
-                        segmentation=new_mask, # Coco formate
-                        area=area,
-                        bbox=bbox,
-                        #keypoints=centroid,
-                        iscrowd=0,
-                    )
-                )
-
 # TODO: Add function to change the label in original annotations
 # TODO: Change the input to argument
 if __name__ == "__main__":
     train_or_val = 'val'
-    config_file = '/home/gxl/code/AdelaiDet/configs/CondInst/MS_R_50_1x_gxl_test.yaml'
-    output_dir = '/home/gxl/Data/Newstation/Instance/Smart/bitmask/' + train_or_val
-    output_json_dir = '/home/gxl/Data/Newstation/Instance/Smart/bitmask/'
-    labels = "/home/gxl/Data/labels.txt" # Label categorys to get class id 
-    ignore_label = ['Filament']
+    config_file = 'configs/CondInst/MS_R_50_1x_gxl_test.yaml'
+    output_dir = 'output' + train_or_val
+    output_json_dir = 'output'
+    labels = "Data/labels.txt" # Label categorys to get class id 
+    ignore_label = ['Fragment']
     paralle_num = 8
-    #merg_label = ['Filament', 'Filament_alone']
-    #ignore_label = []
     merg_label = []
     isvisualize = False
     if not labels:
@@ -389,9 +226,10 @@ if __name__ == "__main__":
     stds = []
     areas = []
     keypoints = []
-    # Generating shuffle index for image 
+    # Rotate the image pre rotate_angle.
     rotate_angle = 360
     tot_img_num = (len(datasets_dict) * (int(360 / rotate_angle) + 1))
+    # Generating shuffle index for image 
     inds_img = list(range(1, tot_img_num + 1))
     #random.shuffle(inds_img)
     classes = metadata.get('thing_classes', None)
@@ -663,7 +501,6 @@ if __name__ == "__main__":
     with open(filepath_static, "w") as f:
         json.dump(data_static, f)
     #filepath_static = os.path.join(output_json_dir, 'static.csv')
-    #saveascsv(filepath_static, data_static)
     print("mean: ", str(mean))
     print("std: ", str(std))
     with open(out_ann_file, "w") as f:
