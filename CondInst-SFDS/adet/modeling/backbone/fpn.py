@@ -13,7 +13,6 @@ from .mobilenet import build_mnv2_backbone
 from .resnet_d import build_resnetd_backbone
 from .fpn_attention import FPN_ATTENTION, build_resnet_fpn_attention_backbone
 from .resnet_d_se import build_resnetd_se_backbone
-from .resnet_d_csp import build_cspnet_backbone
 from .resnet_d_ppsa import build_resnetd_ppsa_backbone
 
 class LastLevelP6P7(nn.Module):
