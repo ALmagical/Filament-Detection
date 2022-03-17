@@ -477,64 +477,6 @@ class CondInst(nn.Module):
         sum_masks =sum_masks[keep]
 
         
-        # Erosion
-        # Resize mask.
-        """
-        resized_mask_h = 768
-        resized_mask_w = 768
-        factor = round(resized_mask_h / H)
-        seg_preds = aligned_bilinear(
-            seg_preds, factor
-        )
-        seg_preds = seg_preds[:, :, :resized_mask_h, :resized_mask_w]
-        seg_preds = F.interpolate(
-            seg_preds,
-            size=(resized_mask_h, resized_mask_w),
-            mode="bilinear", align_corners=False
-        )
-        
-        # erosion
-        #num_inst = len(pred_classes)
-
-        #seg_preds = mean_filter(seg_preds, ksize=(3,3))
-        #masks = medium_filter(seg_preds.cpu(), ksize=(7,7))
-        #masks = masks.cuda()
-        #masks = (masks > 0)
-        
-        masks = seg_preds > 0.2
-
-        masks = erosion(masks, ksize=(7,7))
-        #masks = erosion(masks, ksize=(3,3))
-
-        #seg_preds = seg_preds * masks
-
-        seg_preds = torch.nn.functional.softsign(seg_preds + masks)
-
-        seg_preds = mean_filter(seg_preds, ksize=(3,3))
-        """
-        """
-        # Using mask_threshold to adjust the mask area of prediction.
-        seg_masks = seg_preds > mask_threshold
-        # Computing area of each mask.
-        sum_masks = seg_masks.sum((2, 3)).float()
-
-        # Remove masks which area are 0. Because it will result in nan for seg_scores.
-        inds_not_zero = torch.where(sum_masks==0, False, True)
-        inds_not_zero = inds_not_zero.reshape(inds_not_zero.shape[0])
-        seg_masks = seg_masks[inds_not_zero]
-        sum_masks = sum_masks[inds_not_zero]
-        seg_preds = seg_preds[inds_not_zero]
-        pred_classes = pred_classes[inds_not_zero]
-        pred_scores = pred_scores[inds_not_zero]
-
-        if len(pred_classes) == 0:
-            results = Instances(results.image_size)
-            results.scores = torch.tensor([])
-            results.pred_classes = torch.tensor([])
-            results.pred_masks = torch.tensor([])
-            results.pred_boxes = Boxes(torch.tensor([]))
-            return results
-        """
         # @gxl
         # Fusion mask
         if self.fuse_mask == True:

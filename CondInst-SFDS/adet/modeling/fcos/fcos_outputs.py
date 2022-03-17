@@ -570,22 +570,10 @@ class FCOSOutputs(nn.Module):
             # multiclass nms
             # @gxl
             #print(len(boxlists[i]))
-            #result = ml_nms(boxlists[i], self.nms_thresh)
-            
-            if self.special_classes_thresh:
-                result = ml_nms_gxl(boxlists[i], self.nms_thresh_nom, self.nms_thresh_spc, self.special_classes)
-                # @gxl
-                # Muiticlass nms, this will filter the bboxes which have high IOU 
-                # scores between different classes. Maybe slow down the speed of inference.
-                result = mc_nms(result, self.nms_thresh_all)
-            else:
-                result = mc_nms(boxlists[i], self.nms_thresh)
-                #print(self.nms_thresh)
-                #exit()
+            result = ml_nms(boxlists[i], self.nms_thresh)
             
             number_of_detections = len(result)
-            #print(number_of_detections)
-            #exit()
+
             # Limit to max_per_image detections **over all classes**
             if number_of_detections > self.post_nms_topk > 0:
                 cls_scores = result.scores
