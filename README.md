@@ -19,12 +19,14 @@ Some codes in detectron2 has been changed by us.
 
 The modifications include adding the categories of solar filaments, supporting Adam optimazer and so on.
 
-You can access the original [Detectron](https://github.com/facebookresearch/detectron2) by this link.
+You can access the original [Detectron2](https://github.com/facebookresearch/detectron2) by this link.
 
 
 ## Installation
 
 Before you use CondInst-SFDS, make sure the **detectron2** has installed.
+
+More detail of detectron2 you can see [Readme of detectron2](detectron2\README.md).
 
 Build CondInst_SFDS with:
 
@@ -38,4 +40,3 @@ cd Filament-Detection
 python setup.py build develop
 ```
 
-More detail of detectron2 you can see [Readme of detectron2](detectron2\README.md).

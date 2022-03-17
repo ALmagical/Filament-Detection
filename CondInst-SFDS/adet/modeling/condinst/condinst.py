@@ -24,7 +24,7 @@ from adet.utils.puttotensorboard import put_image_to_tensorboard, vis_bbox
 from detectron2.utils.events import EventStorage, get_event_storage
 from adet.modeling.solov2.utils import matrix_nms, mask_nms
 
-from gxl.units.unit import erosion, medium_filter, mean_filter
+from tools.units.unit import erosion, medium_filter, mean_filter
 
 __all__ = ["CondInst"]
 
